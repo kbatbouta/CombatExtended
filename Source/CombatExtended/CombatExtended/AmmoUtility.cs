@@ -50,21 +50,24 @@ namespace CombatExtended
             var secExpProps = projectileDef.GetCompProperties<CompProperties_ExplosiveCE>();
             if (secExpProps != null)
             {
-                if (secExpProps.explosionRadius > 0)
+                if (secExpProps.explosiveRadius > 0)
                 {
                     stringBuilder.AppendLine("   " + "CE_DescSecondaryExplosion".Translate() + ":");
-                    stringBuilder.AppendLine("   " + "   " + "CE_DescExplosionRadius".Translate() + ": " + secExpProps.explosionRadius.ToStringByStyle(ToStringStyle.FloatOne));
+                    stringBuilder.AppendLine("   " + "   " + "CE_DescExplosionRadius".Translate() + ": " + secExpProps.explosiveRadius.ToStringByStyle(ToStringStyle.FloatOne));
                     stringBuilder.AppendLine("   " + "   " + "CE_DescDamage".Translate() + ": " +
-                                             secExpProps.explosionDamage.ToStringByStyle(ToStringStyle.Integer) + " (" + secExpProps.explosionDamageDef.LabelCap + ")");
+                                             secExpProps.damageAmountBase.ToStringByStyle(ToStringStyle.Integer) + " (" + secExpProps.explosiveDamageType.LabelCap + ")");
                 }
+              /* Fragrange never did anything
                 if (secExpProps.fragRange > 0)
                 {
                     stringBuilder.AppendLine("   " + "CE_DescFragRange".Translate() + ": " + secExpProps.fragRange.ToStringByStyle(ToStringStyle.FloatTwo));
-                }
+                }*/
             }
 
             // CE stats
-            stringBuilder.AppendLine("   " + "CE_DescArmorPenetration".Translate() + ": " + props.armorPenetrationSharp.ToStringByStyle(ToStringStyle.FloatTwo) + "CE_mmRHA".Translate());
+            stringBuilder.AppendLine("   " + "CE_DescSharpPenetration".Translate() + ": " + props.armorPenetrationSharp.ToStringByStyle(ToStringStyle.FloatTwo) + " " + "CE_mmRHA".Translate());
+            stringBuilder.AppendLine("   " + "CE_DescBluntPenetration".Translate() + ": " + props.armorPenetrationBlunt.ToStringByStyle(ToStringStyle.FloatTwo) + " " + "CE_MPa".Translate());
+
             if (props.pelletCount > 1)
             {
                 stringBuilder.AppendLine("   " + "CE_DescPelletCount".Translate() + ": " + GenText.ToStringByStyle(props.pelletCount, ToStringStyle.Integer));
@@ -82,5 +85,17 @@ namespace CombatExtended
             var ammo = ThingDefOf.Turret_Mortar.building.turretGunDef.GetCompProperties<CompProperties_AmmoUser>();
             return ammo?.ammoSet.ammoTypes.Any(l => l.ammo == def) ?? false;
         }
+
+        public static bool IsAmmoSystemActive(AmmoDef def)
+		{
+            if (Controller.settings.EnableAmmoSystem) return true;
+            return (def != null && def.isMortarAmmo);
+		}
+
+        public static bool IsAmmoSystemActive(AmmoSetDef ammoSet)
+		{
+            if (Controller.settings.EnableAmmoSystem) return true;
+            return (ammoSet != null && ammoSet.isMortarAmmoSet);
+		}
     }
 }

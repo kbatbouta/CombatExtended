@@ -43,30 +43,31 @@
       <graphicClass>Graphic_StackCount</graphicClass>
     </graphicData>
     <statBases>
-      <MarketValue>109.66</MarketValue>
+      <MarketValue>10.97</MarketValue> <!-- value intentionally decreased to help reduce wealth bloat/free silver -->
     </statBases>
     <ammoClass>ThermobaricFuel</ammoClass>
-    <comps>
-      <li Class="CombatExtended.CompProperties_ExplosiveCE">
-        <explosionDamageDef>Thermobaric</explosionDamageDef>
-        <explosionDamage>383</explosionDamage>
-        <explosionRadius>5.5</explosionRadius>
-        <preExplosionSpawnThingDef>Filth_Fuel</preExplosionSpawnThingDef>
-        <preExplosionSpawnChance>0.5</preExplosionSpawnChance>
-        <soundExplode>MortarIncendiary_Explode</soundExplode>
-        <applyDamageToExplosionCellsNeighbors>true</applyDamageToExplosionCellsNeighbors>
-      </li>
-    </comps>
+	<detonateProjectile>Bullet_80x256mmFuel_Thermobaric</detonateProjectile>
+	<comps>
+    <li Class="CompProperties_Explosive">
+        <explosiveRadius>2</explosiveRadius>
+        <explosiveDamageType>Thermobaric</explosiveDamageType>
+		<explosiveExpandPerStackcount>0.15</explosiveExpandPerStackcount>
+        <startWickHitPointsPercent>0.33</startWickHitPointsPercent>
+		<applyDamageToExplosionCellsNeighbors>true</applyDamageToExplosionCellsNeighbors>
+		<explodeOnKilled>True</explodeOnKilled>
+        <wickTicks>60~300</wickTicks>
+    </li>
+	</comps>
   </ThingDef>
 
   <!-- ================== Projectiles ================== -->
 
-  <ThingDef Class="CombatExtended.AmmoDef" ParentName="BaseBullet">
+  <ThingDef ParentName="BaseBullet">
     <defName>Bullet_80x256mmFuel_Thermobaric</defName>
     <thingClass>CombatExtended.ProjectileCE_Explosive</thingClass>
     <label>80x256mm fuel shell (Thermobaric)</label>
     <graphicData>
-      <texPath>Things/Projectile/InfernoCannonShot</texPath>
+      <texPath>Things/Projectile/LauncherShot</texPath>
       <graphicClass>Graphic_Single</graphicClass>
       <shaderType>TransparentPostLight</shaderType>
     </graphicData>

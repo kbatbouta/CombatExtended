@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Reflection.Emit;
-using Harmony;
+using HarmonyLib;
 using Verse;
 
-namespace CombatExtended.Harmony
+namespace CombatExtended.HarmonyCE
 {
     static class Harmony_Hediff_Injury
     {
@@ -26,9 +26,9 @@ namespace CombatExtended.Harmony
                         // search for BodyPartRecord::coverageAbs
                         case 0:
                             if (instruction.opcode == OpCodes.Ldfld
-                                && instruction.operand == AccessTools.Field(
+                                && ReferenceEquals(instruction.operand, AccessTools.Field(
                                     typeof(BodyPartRecord),
-                                    nameof(BodyPartRecord.coverageAbs)))
+                                    nameof(BodyPartRecord.coverageAbs))))
                                 patchPhase = 1;
                             break;
                         // search for greater than check

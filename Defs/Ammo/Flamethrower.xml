@@ -51,13 +51,13 @@
     </statBases>
     <ammoClass>NapalmFuel</ammoClass>
     <comps>
-      <li Class="CombatExtended.CompProperties_ExplosiveCE">
-		<explosionDamage>2</explosionDamage>
-        <explosionDamageDef>Flame</explosionDamageDef>
-        <explosionRadius>1</explosionRadius>
-		<preExplosionSpawnThingDef>Filth_Fuel</preExplosionSpawnThingDef>
-		<preExplosionSpawnChance>1</preExplosionSpawnChance>
-      </li>
+		  <li Class="CombatExtended.CompProperties_ExplosiveCE">
+			<damageAmountBase>2</damageAmountBase>
+			<explosiveDamageType>Flame</explosiveDamageType>
+			<explosiveRadius>1</explosiveRadius>
+			<preExplosionSpawnThingDef>Filth_Fuel</preExplosionSpawnThingDef>
+			<preExplosionSpawnChance>1</preExplosionSpawnChance>
+		  </li>
     </comps>
   </ThingDef>
 
@@ -73,19 +73,19 @@
     </statBases>
     <ammoClass>JelliedPrometheumFuel</ammoClass>
     <comps>
-      <li Class="CombatExtended.CompProperties_ExplosiveCE">
-		<explosionDamage>5</explosionDamage>
-        <explosionDamageDef>PrometheumFlame</explosionDamageDef>
-        <explosionRadius>1.2</explosionRadius>
+	  <li Class="CombatExtended.CompProperties_ExplosiveCE">
+		<damageAmountBase>5</damageAmountBase>
+		<explosiveDamageType>PrometheumFlame</explosiveDamageType>
+		<explosiveRadius>1.2</explosiveRadius>
 		<preExplosionSpawnThingDef>FilthPrometheum</preExplosionSpawnThingDef>
 		<preExplosionSpawnChance>1</preExplosionSpawnChance>
-      </li>
+	  </li>
     </comps>
   </ThingDef>
 	
 	<!-- ================== Projectiles ================== -->
 
-  <ThingDef Class="CombatExtended.AmmoDef" Name="BaseFlamethrowerBullet" ParentName="BaseBullet" Abstract="true">
+  <ThingDef Name="BaseFlamethrowerBullet" ParentName="BaseBullet" Abstract="true">
     <graphicData>
       <texPath>Things/Special/Fire/FireA</texPath>
       <graphicClass>Graphic_Single</graphicClass>
@@ -97,7 +97,7 @@
     </projectile>
   </ThingDef>
 
-  <ThingDef Class="CombatExtended.AmmoDef" ParentName="BaseFlamethrowerBullet">
+  <ThingDef ParentName="BaseFlamethrowerBullet">
     <defName>Bullet_Flamethrower_Napalm</defName>
     <thingClass>CombatExtended.ProjectileCE_Explosive</thingClass>
     <label>jellied chemfuel stream</label>
@@ -112,7 +112,7 @@
     </projectile>
   </ThingDef>
 
-  <ThingDef Class="CombatExtended.AmmoDef" ParentName="BaseFlamethrowerBullet">
+  <ThingDef ParentName="BaseFlamethrowerBullet">
     <defName>Bullet_Flamethrower_Prometheum</defName>
     <thingClass>CombatExtended.ProjectileCE_Explosive</thingClass>
     <label>jellied Prometheum stream</label>
@@ -138,9 +138,9 @@
 
   <RecipeDef ParentName="FlamethrowerAmmoRecipeBase">
     <defName>MakeAmmo_Flamethrower_Napalm</defName>
-    <label>make Napalm x100</label>
-    <description>Craft 100 units of Napalm.</description>
-    <jobString>Making Napalm.</jobString>
+    <label>make jellied chemfuel x100</label>
+    <description>Craft 100 units of jellied chemfuel.</description>
+    <jobString>Making jellied chemfuel.</jobString>
     <ingredients>
       <li>
         <filter>

@@ -47,7 +47,7 @@ namespace CombatExtended
 		/// </summary>
 		/// <param name="pawn">Pawn that the job is supposed to take place on.</param>
 		/// <returns>Job that the pawn is to be working on.</returns>
-		protected override Job TryGiveJob(Pawn pawn)
+		public override Job TryGiveJob(Pawn pawn)
 		{
 			ThingWithComps gun;
 			AmmoDef ammo;
@@ -56,7 +56,6 @@ namespace CombatExtended
 			if (DoReloadCheck(pawn, out gun, out ammo))
 			{
 				CompAmmoUser comp = gun.TryGetComp<CompAmmoUser>();
-				CompInventory compInventory = pawn.TryGetComp<CompInventory>();
 				// we relied on DoReloadCheck() to do error checking of many variables.
 				
 				if (!comp.TryUnload()) return null; // unload the weapon or stop trying if there was a problem.

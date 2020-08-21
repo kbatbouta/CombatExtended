@@ -34,7 +34,7 @@
 
   <ThingDef Name="ArmorMakeableBase" ParentName="ApparelBase" Abstract="True">
     <recipeMaker>
-      <workSpeedStat>SmithingSpeed</workSpeedStat>
+      <workSpeedStat>GeneralLaborSpeed</workSpeedStat>
       <workSkill>Crafting</workSkill>
       <effectWorking>Smith</effectWorking>
       <soundWorking>Recipe_Machining</soundWorking>
@@ -74,7 +74,7 @@
       <EquipDelay>5</EquipDelay>
     </statBases>
     <thingCategories>
-      <li>Apparel</li>
+      <li>ApparelArmor</li>
     </thingCategories>
     <costList>
       <Steel>60</Steel>

@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Reflection.Emit;
-using Harmony;
+using HarmonyLib;
 using RimWorld;
 using Verse;
 
-namespace CombatExtended.Harmony
+namespace CombatExtended.HarmonyCE
 {
     [HarmonyPatch(typeof(FireUtility), "ChanceToStartFireIn")]
     internal static class Harmony_FireUtility_ChanceToStartFireIn
@@ -23,7 +23,7 @@ namespace CombatExtended.Harmony
 
                     write = false;
                 }
-                else if (code.opcode == OpCodes.Ldfld && code.operand == AccessTools.Field(typeof(ThingDef), nameof(ThingDef.category)))
+                else if (code.opcode == OpCodes.Ldfld && ReferenceEquals(code.operand, AccessTools.Field(typeof(ThingDef), nameof(ThingDef.category))))
                 {
                     write = true;
                 }

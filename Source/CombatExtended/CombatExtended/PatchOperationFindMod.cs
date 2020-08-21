@@ -11,9 +11,9 @@ namespace CombatExtended
 {
     public class PatchOperationFindMod : PatchOperation
     {
-        private string modName;
+        protected string modName;
 
-        protected override bool ApplyWorker(XmlDocument xml)
+        public override bool ApplyWorker(XmlDocument xml)
         {
             if (modName.NullOrEmpty())
             {

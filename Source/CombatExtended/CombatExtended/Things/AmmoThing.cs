@@ -16,6 +16,7 @@ namespace CombatExtended
         #region Properties
 
         private AmmoDef AmmoDef => def as AmmoDef;
+        public bool IsCookingOff => numToCookOff > 0;
 
         #endregion
 
@@ -61,7 +62,9 @@ namespace CombatExtended
                 {
                     numToCookOff += Mathf.RoundToInt(def.stackLimit * ((float)dinfo.Amount / HitPoints) * (def.smallVolume ? Rand.Range(1f, 2f) : Rand.Range(0.0f, 1f)));
                 }
-                else TryDetonate(Mathf.Min(75, stackCount));
+                //Assume CompExplosive destroys on kill
+                else if (this.TryGetComp<CompExplosive>() == null || !this.TryGetComp<CompExplosive>().Props.explodeOnKilled)
+                    TryDetonate(stackCount);
             }
         }
 
@@ -73,10 +76,10 @@ namespace CombatExtended
                 if (shouldDestroy == -1)
                 {
                     shouldDestroy = !def.IsWeapon && (AmmoDef?.tradeTags?.Contains(AmmoInjector.destroyWithAmmoDisabledTag) ?? false)
-                        ? 1
-                        : 0;
+                        ? 1     //isn't a weapon AND has the tag
+                        : 0;    //is a weapon or doesn't have the tag (shouldn't be destroyed)
                 }
-                return shouldDestroy == 1 && !Controller.settings.EnableAmmoSystem;
+                return shouldDestroy == 1 && !AmmoUtility.IsAmmoSystemActive(AmmoDef);
             }
         }
 
@@ -85,6 +88,7 @@ namespace CombatExtended
             // Self-destruct if ammo is disabled
             if (ShouldDestroy) Destroy(DestroyMode.Vanish);
 
+            //Calls CompExplosive _first_
             base.Tick();
 
             // Cook off ammo based on how much damage we've taken so far
@@ -116,24 +120,43 @@ namespace CombatExtended
             {
                 stringBuilder.AppendLine(inspectString);
             }
-
-            if (Controller.settings.EnableAmmoSystem)
+            if (AmmoUtility.IsAmmoSystemActive(AmmoDef))
             {
                 var count = AmmoDef?.Users.Count ?? 0;
 
                 if (count >= 1)
-                    stringBuilder.AppendLine("CE_UsedBy".Translate() + ": " + AmmoDef.Users.FirstOrDefault().LabelCap + (AmmoDef.Users.Count > 1 ? " (+" + (AmmoDef.Users.Count - 1) + " more..)" : ""));
+                    stringBuilder.AppendLine("CE_UsedBy".Translate() + ": " + AmmoDef.Users.FirstOrDefault().LabelCap + (AmmoDef.Users.Count > 1 ? " (+" + (AmmoDef.Users.Count - 1) + ")" : ""));
             }
 
             return stringBuilder.ToString().TrimEndNewlines();
         }
 
-        private bool TryDetonate(float scale = 1)
+        private bool TryDetonate(float stackCountScale = 1)
         {
             CompExplosiveCE comp = this.TryGetComp<CompExplosiveCE>();
-            if (comp != null)
+            var detProps = AmmoDef?.detonateProjectile?.projectile;
+
+            if (comp != null || detProps != null)
             {
-            	if(Rand.Chance(Mathf.Clamp01(0.75f - Mathf.Pow(HitPoints / MaxHitPoints, 2)))) comp.Explode(this, Position.ToVector3Shifted(), Map, Mathf.Pow(scale, 0.333f));
+                if (Rand.Chance(Mathf.Clamp01(0.75f - Mathf.Pow(HitPoints / MaxHitPoints, 2))))
+                {
+                    if (comp != null)
+                        comp.Explode(this, Position.ToVector3Shifted(), Map, Mathf.Pow(stackCountScale, 0.333f), null, new List<Thing>() { this });
+                    else
+                        this.TryGetComp<CompFragments>()?.Throw(Position.ToVector3Shifted(), Map, this); //Mathf.Pow(scale, 0.333f));
+
+                    if (detProps != null)
+                    {
+                        GenExplosionCE.DoExplosion(Position, Map, detProps.explosionRadius, detProps.damageDef,
+                            this, detProps.GetDamageAmount(1), detProps.GetArmorPenetration(1),
+                            detProps.soundExplode,
+                            null, def, null, detProps.postExplosionSpawnThingDef, detProps.postExplosionSpawnChance,
+                            detProps.postExplosionSpawnThingCount, detProps.applyDamageToExplosionCellsNeighbors,
+                            detProps.preExplosionSpawnThingDef, detProps.preExplosionSpawnChance, detProps.preExplosionSpawnThingCount,
+                            detProps.explosionChanceToStartFire, detProps.explosionDamageFalloff, null, new List<Thing>() { this }, 0f, Mathf.Pow(stackCountScale, 0.333f));
+                    }
+                }
+
                 return true;
             }
             return false;
@@ -169,6 +192,13 @@ namespace CombatExtended
             return true;
         }
 
+        public override void ExposeData()
+        {
+            base.ExposeData();
+
+            //Such that save-reloading doesn't stop ammo cookoff
+            Scribe_Values.Look(ref numToCookOff, "numToCookOff", 0);
+        }
         #endregion
     }
 }

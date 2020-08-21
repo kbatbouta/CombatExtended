@@ -6,11 +6,16 @@ using Verse;
 using Verse.Sound;
 using RimWorld;
 using UnityEngine;
+using HarmonyLib;
 
 namespace CombatExtended
 {
     public class BulletCE : ProjectileCE
     {
+        static RulePackDef damageEvent_CookOff = DefDatabase<RulePackDef>.GetNamed("DamageEvent_CookOff");
+
+        // TODO: Maybe make this async - like, queue up all impacts and execute on another thread every ~x ticks
+        // BattleLog.Add chewing ~2ms per rocket for me - Wiri
         private void LogImpact(Thing hitThing, out LogEntry_DamageResult logEntry)
         {
             logEntry =
@@ -28,7 +33,7 @@ namespace CombatExtended
 
         protected override void Impact(Thing hitThing)
         {
-            bool cookOff = (launcher is AmmoThing);
+            bool cookOff = launcher is AmmoThing;
 
             Map map = base.Map;
             LogEntry_DamageResult logEntry = null;
@@ -78,8 +83,8 @@ namespace CombatExtended
                     logEntry =
                         new BattleLogEntry_DamageTaken(
                             (Pawn)hitThing,
-                            DefDatabase<RulePackDef>.GetNamed("DamageEvent_CookOff"));
-                    Find.BattleLog.Add(logEntry);
+                            damageEvent_CookOff);
+                    Find.BattleLog.Add(logEntry); // BatteLog again
                 }
 
                 try
@@ -125,6 +130,48 @@ namespace CombatExtended
                 }
                 base.Impact(hitThing);
             }
+            NotifyImpact(hitThing, map, Position);
         }
+
+        /* Mostly imported wholesale from vanilla Bullet class,
+         * except we create a temporary Bullet object for Notify_BulletImpactNearby.
+         */
+        private void NotifyImpact(Thing hitThing, Map map, IntVec3 position)
+        {
+            var vanillaBullet = new Bullet
+            {
+                def = this.def,
+                intendedTarget = this.intendedTarget,
+                launcher = this.launcher,
+            };
+
+            BulletImpactData impactData = new BulletImpactData
+            {
+                bullet = vanillaBullet,
+                hitThing = hitThing,
+                impactPosition = position
+            };
+            if (hitThing != null)
+            {
+                hitThing.Notify_BulletImpactNearby(impactData);
+            }
+            for (int i = 0; i < 9; i++)
+            {
+                IntVec3 c = position + GenRadial.RadialPattern[i];
+                if (!c.InBounds(map)) continue;
+
+                List<Thing> thingList = c.GetThingList(map);
+                for (int j = 0; j < thingList.Count; j++)
+                {
+                    if (thingList[j] != hitThing)
+                    {
+                        thingList[j].Notify_BulletImpactNearby(impactData);
+                    }
+                }
+
+            }
+            vanillaBullet.Destroy();    //remove previously created object after notifications are sent
+        }
+
     }
 }

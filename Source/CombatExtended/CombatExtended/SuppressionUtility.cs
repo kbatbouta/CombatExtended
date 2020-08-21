@@ -35,11 +35,9 @@ namespace CombatExtended
             }
 
             //Tell pawn to move to position
-            var job = new Job(CE_JobDefOf.RunForCover, coverPosition)
-            {
-                locomotionUrgency = LocomotionUrgency.Sprint,
-                playerForced = true
-            };
+            var job = JobMaker.MakeJob(CE_JobDefOf.RunForCover, coverPosition);
+            job.locomotionUrgency = LocomotionUrgency.Sprint;
+            job.playerForced = true;
             return job;
         }
 
@@ -130,7 +128,7 @@ namespace CombatExtended
             }
 
             // Attack break
-            if (!(pawn.story.WorkTagIsDisabled(WorkTags.Violent)
+            if (!(pawn.WorkTagIsDisabled(WorkTags.Violent)
                   || traits.DegreeOfTrait(TraitDefOf.Nerves) < 0
                   || traits.DegreeOfTrait(CE_TraitDefOf.Bravery) < 0))
             {

@@ -5,6 +5,7 @@ using System.Text;
 using RimWorld;
 using Verse;
 using UnityEngine;
+using HarmonyLib;
 
 namespace CombatExtended
 {
@@ -27,26 +28,45 @@ namespace CombatExtended
 
         public override bool ShouldShowFor(StatRequest req)
         {
-            return base.ShouldShowFor(req) && 
-                (Controller.settings.EnableAmmoSystem
-                    ? GunDef(req)?.GetCompProperties<CompProperties_AmmoUser>()?.ammoSet != null
-                    : (GunDef(req)?.Verbs?.Any(x => x.defaultProjectile != null) ?? false));
+            if (!base.ShouldShowFor(req)) return false;
+
+            AmmoSetDef ammoSet = GunDef(req)?.GetCompProperties<CompProperties_AmmoUser>()?.ammoSet;
+            if (AmmoUtility.IsAmmoSystemActive(ammoSet))
+            {
+                return (ammoSet != null);
+            }
+            else
+            {
+                return (GunDef(req)?.Verbs?.Any(x => x.defaultProjectile != null) ?? false);
+            }
+        }
+
+        public override IEnumerable<Dialog_InfoCard.Hyperlink> GetInfoCardHyperlinks(StatRequest statRequest)
+        {
+            var ammoSet = GunDef(statRequest)?.GetCompProperties<CompProperties_AmmoUser>().ammoSet;
+            if (ammoSet != null && AmmoUtility.IsAmmoSystemActive(ammoSet))
+            {
+                foreach (var ammoType in ammoSet.ammoTypes)
+                {
+                    yield return new Dialog_InfoCard.Hyperlink(ammoType.ammo);
+                }
+            }
         }
 
         public override string GetExplanationUnfinalized(StatRequest req, ToStringNumberSense numberSense)
         {
             StringBuilder stringBuilder = new StringBuilder();
 
-            if (Controller.settings.EnableAmmoSystem)
+            var ammoSet = GunDef(req)?.GetCompProperties<CompProperties_AmmoUser>().ammoSet;
+            if (AmmoUtility.IsAmmoSystemActive(ammoSet))
             {
-                var ammoSet = GunDef(req)?.GetCompProperties<CompProperties_AmmoUser>().ammoSet;
                 if (ammoSet != null)
                 {
                     // Append various ammo stats
                     stringBuilder.AppendLine(ammoSet.LabelCap + "\n");
                     foreach (var cur in ammoSet.ammoTypes)
                     {
-                        string label = string.IsNullOrEmpty(cur.ammo.ammoClass.LabelCapShort) ? cur.ammo.ammoClass.LabelCap : cur.ammo.ammoClass.LabelCapShort;
+                        string label = string.IsNullOrEmpty(cur.ammo.ammoClass.LabelCapShort) ? (string)cur.ammo.ammoClass.LabelCap : cur.ammo.ammoClass.LabelCapShort;
                         stringBuilder.AppendLine(label + ":\n" + cur.projectile.GetProjectileReadout(Gun(req)));   //Is fine handling req.Thing == null, then it sets mult = 1
                     }
                 }
@@ -62,16 +82,17 @@ namespace CombatExtended
             return stringBuilder.ToString().TrimEndNewlines();
         }
 
-        public override string GetStatDrawEntryLabel(StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq)
+        public override string GetStatDrawEntryLabel(StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized = true)
         {
-            if (Controller.settings.EnableAmmoSystem)
+            var ammoSet = GunDef(optionalReq)?.GetCompProperties<CompProperties_AmmoUser>()?.ammoSet;
+            if (AmmoUtility.IsAmmoSystemActive(ammoSet))
             {
-                return GunDef(optionalReq)?.GetCompProperties<CompProperties_AmmoUser>()?.ammoSet?.LabelCap;
+                return ammoSet?.LabelCap;
             }
             else
             {
                 var projectiles = GunDef(optionalReq)?.Verbs?.Where(x => x.defaultProjectile != null).Select(x => x.defaultProjectile);
-                return projectiles.First().LabelCap + (projectiles.Count() > 1 ? "(+"+(projectiles.Count() - 1)+" more..)" : "");
+                return projectiles.First().LabelCap + (projectiles.Count() > 1 ? "(+"+(projectiles.Count() - 1)+")" : "");
             }
         }
     }

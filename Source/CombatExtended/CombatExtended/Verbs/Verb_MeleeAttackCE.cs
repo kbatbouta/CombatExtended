@@ -22,7 +22,7 @@ namespace CombatExtended
     {
         #region Constants
 
-        private const int TargetCooldown = 50;
+        private new const int TargetCooldown = 50;
         private const float DefaultHitChance = 0.6f;
         private const float ShieldBlockChance = 0.75f;   // If we have a shield equipped, this is the chance a parry will be a shield block
         private const int KnockdownDuration = 120;   // Animal knockdown lasts for this long
@@ -65,7 +65,7 @@ namespace CombatExtended
         /// Performs the actual melee attack part. Awards XP, calculates and applies whether an attack connected and the outcome.
         /// </summary>
         /// <returns>True if the attack connected, false otherwise</returns>
-        protected override bool TryCastShot()
+        public override bool TryCastShot()
         {
             Pawn casterPawn = CasterPawn;
             if (casterPawn.stances.FullBodyBusy)
@@ -251,26 +251,43 @@ namespace CombatExtended
             //END 1:1 COPY
             BodyPartHeight bodyRegion = GetBodyPartHeightFor(target);   //Custom // Add check for body height
             //START 1:1 COPY
-            DamageInfo mainDinfo = new DamageInfo(def, damAmount, armorPenetration, -1f, caster, null, source, DamageInfo.SourceCategory.ThingOrUnknown, null); //Alteration
+            DamageInfo damageInfo = new DamageInfo(def, damAmount, armorPenetration, -1f, caster, null, source, DamageInfo.SourceCategory.ThingOrUnknown, null); //Alteration
 
             // Predators get a neck bite on immobile targets
             if (caster.def.race.predator && IsTargetImmobile(target) && target.Thing is Pawn pawn)
             {
                 var neck = pawn.health.hediffSet.GetNotMissingParts(BodyPartHeight.Top, BodyPartDepth.Outside)
                     .FirstOrDefault(r => r.def == BodyPartDefOf.Neck);
-                mainDinfo.SetHitPart(neck);
+                damageInfo.SetHitPart(neck);
             }
 
-            mainDinfo.SetBodyRegion(bodyRegion); //Alteration
-            mainDinfo.SetWeaponBodyPartGroup(bodyPartGroupDef);
-            mainDinfo.SetWeaponHediff(hediffDef);
-            mainDinfo.SetAngle(direction);
-            yield return mainDinfo;
+            damageInfo.SetBodyRegion(bodyRegion);
+            damageInfo.SetWeaponBodyPartGroup(bodyPartGroupDef);
+            damageInfo.SetWeaponHediff(hediffDef);
+            damageInfo.SetAngle(direction);
+            yield return damageInfo;
+            if (this.tool != null && this.tool.extraMeleeDamages != null)
+            {
+                foreach (ExtraDamage extraDamage in this.tool.extraMeleeDamages)
+                {
+                    if (Rand.Chance(extraDamage.chance))
+                    {
+                        damAmount = extraDamage.amount;
+                        damAmount = Rand.Range(damAmount * 0.8f, damAmount * 1.2f);
+                        var extraDamageInfo = new DamageInfo(extraDamage.def, damAmount, extraDamage.AdjustedArmorPenetration(this, this.CasterPawn), -1f, this.caster, null, source, DamageInfo.SourceCategory.ThingOrUnknown, null);
+                        extraDamageInfo.SetBodyRegion(BodyPartHeight.Undefined, BodyPartDepth.Outside);
+                        extraDamageInfo.SetWeaponBodyPartGroup(bodyPartGroupDef);
+                        extraDamageInfo.SetWeaponHediff(hediffDef);
+                        extraDamageInfo.SetAngle(direction);
+                        yield return extraDamageInfo;
+                    }
+                }
+            }
 
             // Apply critical damage
             if (isCrit && !CasterPawn.def.race.Animal && verbProps.meleeDamageDef.armorCategory != DamageArmorCategoryDefOf.Sharp && target.Thing.def.race.IsFlesh)
             {
-                var critAmount = GenMath.RoundRandom(mainDinfo.Amount * 0.25f);
+                var critAmount = GenMath.RoundRandom(damageInfo.Amount * 0.25f);
                 var critDinfo = new DamageInfo(DamageDefOf.Stun, critAmount, armorPenetration,
                     -1, caster, null, source);
                 critDinfo.SetBodyRegion(bodyRegion, BodyPartDepth.Outside);
@@ -305,7 +322,7 @@ namespace CombatExtended
         /// </summary>
         /// <param name="target"></param>
         /// <returns></returns>
-		private bool IsTargetImmobile(LocalTargetInfo target)
+		public new bool IsTargetImmobile(LocalTargetInfo target)
         {
             Thing thing = target.Thing;
             Pawn pawn = thing as Pawn;
@@ -316,10 +333,11 @@ namespace CombatExtended
         /// Applies all DamageInfosToApply to the target. Increases damage on critical hits.
         /// </summary>
         /// <param name="target">Target to apply damage to</param>
-		protected override DamageWorker.DamageResult ApplyMeleeDamageToTarget(LocalTargetInfo target)
+		public override DamageWorker.DamageResult ApplyMeleeDamageToTarget(LocalTargetInfo target)
         {
             DamageWorker.DamageResult result = new DamageWorker.DamageResult();
-            foreach (DamageInfo current in DamageInfosToApply(target, isCrit))
+            IEnumerable<DamageInfo> damageInfosToApply = DamageInfosToApply(target, isCrit);
+            foreach (DamageInfo current in damageInfosToApply)
             {
                 if (target.ThingDestroyed)
                 {
@@ -338,7 +356,9 @@ namespace CombatExtended
                 {
                     //pawn.stances?.stunner.StunFor(KnockdownDuration);
                     pawn.stances?.SetStance(new Stance_Cooldown(KnockdownDuration, pawn, null));
-                    pawn.jobs?.StartJob(new Job(CE_JobDefOf.WaitKnockdown) { expiryInterval = KnockdownDuration }, JobCondition.InterruptForced, null, false, false);
+                    Job job = JobMaker.MakeJob(CE_JobDefOf.WaitKnockdown);
+                    job.expiryInterval = KnockdownDuration;
+                    pawn.jobs?.StartJob(job, JobCondition.InterruptForced, null, false, false);
                 }
             }
             isCrit = false;
@@ -355,7 +375,7 @@ namespace CombatExtended
             if (pawn == null
                 || pawn.Dead
                 || !pawn.RaceProps.Humanlike
-                || pawn.story.WorkTagIsDisabled(WorkTags.Violent)
+                || pawn.WorkTagIsDisabled(WorkTags.Violent)
                 || !pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation)
                 || IsTargetImmobile(pawn)
                 || pawn.MentalStateDef == MentalStateDefOf.SocialFighting)
@@ -446,7 +466,7 @@ namespace CombatExtended
         }
 
         // unmodified
-        private SoundDef SoundHitPawn()
+        private new SoundDef SoundHitPawn()
         {
             if (EquipmentSource != null && EquipmentSource.Stuff != null)
             {
@@ -470,7 +490,7 @@ namespace CombatExtended
         }
 
         // unmodified
-        private SoundDef SoundHitBuilding()
+        public new SoundDef SoundHitBuilding()
         {
             if (EquipmentSource != null && EquipmentSource.Stuff != null)
             {
@@ -494,7 +514,7 @@ namespace CombatExtended
         }
 
         // unmodified
-        private SoundDef SoundMiss()
+        public new SoundDef SoundMiss()
         {
             if (CasterPawn != null && !CasterPawn.def.race.soundMeleeMiss.NullOrUndefined())
             {

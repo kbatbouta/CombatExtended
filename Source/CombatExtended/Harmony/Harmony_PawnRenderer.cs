@@ -3,15 +3,26 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
-using Harmony;
+using HarmonyLib;
 using RimWorld;
+using RimWorld.BaseGen;
 using UnityEngine;
 using Verse;
 
-namespace CombatExtended.Harmony
+namespace CombatExtended.HarmonyCE
 {
+    /*
+        Check this patch if:
+        - Apparel is rendered slightly off from the pawn sprite (update YOffset constants based on PawnRenderer values
+
+
+        If all apparel worn on pawns is the drop image of that apparel,
+            CHECK Harmony_ApparelGraphicRecordGetter.cs
+            INSTEAD!
+     */
+
     [HarmonyPatch(typeof(PawnRenderer), "RenderPawnInternal",
-        typeof(Vector3), typeof(float), typeof(bool), typeof(Rot4), typeof(Rot4), typeof(RotDrawMode), typeof(bool), typeof(bool))]
+        typeof(Vector3), typeof(float), typeof(bool), typeof(Rot4), typeof(Rot4), typeof(RotDrawMode), typeof(bool), typeof(bool), typeof(bool))]
     internal static class Harmony_PawnRenderer_RenderPawnInternal
     {
         private enum WriteState
@@ -23,11 +34,11 @@ namespace CombatExtended.Harmony
         }
 
         // Sync these with vanilla PawnRenderer constants
-        private const float YOffsetBehind = 0.00390625f;
-        private const float YOffsetHead = 0.02734375f;
-        private const float YOffsetOnHead = 0.03125f;
-        private const float YOffsetPostHead = 0.03515625f;
-        private const float YOffsetIntervalClothes = 0.00390625f;
+        private const float YOffsetBehind = 0.00306122447f;
+        private const float YOffsetHead = 0.0244897958f;
+        private const float YOffsetOnHead = 0.0306122452f;
+        private const float YOffsetPostHead = 0.03367347f;
+        private const float YOffsetIntervalClothes = 0.00306122447f;
 
         private static void DrawHeadApparel(PawnRenderer renderer, Mesh mesh, Vector3 rootLoc, Vector3 headLoc, Vector3 headOffset, Rot4 bodyFacing, Quaternion quaternion, bool portrait, ref bool hideHair)
         {
@@ -69,7 +80,8 @@ namespace CombatExtended.Harmony
         private static bool IsPreShellLayer(ApparelLayerDef layer)
         {
             return layer.drawOrder < ApparelLayerDefOf.Shell.drawOrder
-                   || (layer.GetModExtension<ApparelLayerExtension>()?.IsHeadwear ?? false);
+                   || (layer.GetModExtension<ApparelLayerExtension>()?.IsHeadwear ?? false)
+                   || layer == ApparelLayerDefOf.Belt;  //Belt is not actually a pre-shell layer, but we want to treat it as such in this patch, to avoid rendering bugs with utility items (e.g: broadshield pack)
         }
 
         internal static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
@@ -79,20 +91,20 @@ namespace CombatExtended.Harmony
             {
                 if (state == WriteState.WriteHead)
                 {
-                    if (code.opcode == OpCodes.Ldloc_S && ((LocalBuilder)code.operand).LocalIndex == 13)
+                    if (code.opcode == OpCodes.Ldloc_S && ((LocalBuilder)code.operand).LocalIndex == 14)
                     {
                         state = WriteState.None;
 
                         // Insert new calls for head renderer
                         yield return new CodeInstruction(OpCodes.Ldarg_0);
-                        yield return new CodeInstruction(OpCodes.Ldloc_S, 14);
+                        yield return new CodeInstruction(OpCodes.Ldloc_S, 15);
                         yield return new CodeInstruction(OpCodes.Ldarg_1);
-                        yield return new CodeInstruction(OpCodes.Ldloc_S, 12);
-                        yield return new CodeInstruction(OpCodes.Ldloc_S, 9);
+                        yield return new CodeInstruction(OpCodes.Ldloc_S, 13);
+                        yield return new CodeInstruction(OpCodes.Ldloc_S, 11);
                         yield return new CodeInstruction(OpCodes.Ldarg, 4);
                         yield return new CodeInstruction(OpCodes.Ldloc_0);
                         yield return new CodeInstruction(OpCodes.Ldarg, 7);
-                        yield return new CodeInstruction(OpCodes.Ldloca_S, 13);
+                        yield return new CodeInstruction(OpCodes.Ldloca_S, 14);
                         yield return new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(Harmony_PawnRenderer_RenderPawnInternal), nameof(DrawHeadApparel)));
 
                         yield return code;
@@ -109,11 +121,11 @@ namespace CombatExtended.Harmony
                     code.opcode = OpCodes.Brtrue;
                 }
 
-                if (state == WriteState.WritePostShell && code.opcode == OpCodes.Call && code.operand == AccessTools.Method(typeof(GenDraw), nameof(GenDraw.DrawMeshNowOrLater)))
+                if (state == WriteState.WritePostShell && code.opcode == OpCodes.Call && ReferenceEquals(code.operand, AccessTools.Method(typeof(GenDraw), nameof(GenDraw.DrawMeshNowOrLater))))
                 {
                     state = WriteState.None;
 
-                    yield return new CodeInstruction(OpCodes.Ldloca_S, 7);
+                    yield return new CodeInstruction(OpCodes.Ldloca_S, 2);
                     yield return new CodeInstruction(OpCodes.Dup);
                     yield return new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(Vector3), nameof(Vector3.y)));
                     yield return new CodeInstruction(OpCodes.Ldarg_0);
@@ -122,11 +134,11 @@ namespace CombatExtended.Harmony
                     yield return new CodeInstruction(OpCodes.Stfld, AccessTools.Field(typeof(Vector3), nameof(Vector3.y)));
                 }
 
-                if (code.opcode == OpCodes.Stloc_S && ((LocalBuilder)code.operand).LocalIndex == 14)
+                if (code.opcode == OpCodes.Stloc_S && ((LocalBuilder)code.operand).LocalIndex == 15)
                 {
                     state = WriteState.WriteHead;
                 }
-                else if (code.opcode == OpCodes.Ldsfld && code.operand == AccessTools.Field(typeof(ApparelLayerDefOf), nameof(ApparelLayerDefOf.Shell)))
+                else if (code.opcode == OpCodes.Ldsfld && ReferenceEquals(code.operand, AccessTools.Field(typeof(ApparelLayerDefOf), nameof(ApparelLayerDefOf.Shell))))
                 {
                     state = WriteState.WriteShell;
                     code.opcode = OpCodes.Callvirt;
@@ -175,58 +187,11 @@ namespace CombatExtended.Harmony
 
         internal static void Prefix(PawnRenderer __instance, ref Vector3 drawLoc)
         {
-            var pawn = (Pawn)AccessTools.Field(typeof(PawnRenderer), "pawn").GetValue(__instance);
-            if (pawn.Rotation == Rot4.South)
+            if (__instance.pawn.Rotation == Rot4.South)
             {
                 drawLoc.y++;
             }
         }
     }
-
-    ///// <summary>
-    ///// Patches renderer to skip separate drawing of shell layer.
-    ///// That layer is now drawn via Harmony_PawnGraphicSet.RenderShellAsNormalLayer, so that it obeys drawOrder.
-    ///// </summary>
-    //[HarmonyPatch(typeof(PawnRenderer), "RenderPawnInternal")]
-    //[HarmonyPatch(new Type[] { typeof(Vector3), typeof(float), typeof(bool), typeof(Rot4), typeof(Rot4), typeof(RotDrawMode), typeof(bool), typeof(bool) })]
-    //public static class SkipShellLayerDrawing
-    //{
-    //    enum PatchStage { Searching, ExtractTargetLabel, PurgingInstructions, Finished };
-
-    //    internal static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-    //    {
-    //        PatchStage currentStage = PatchStage.Searching;
-    //        Label targetLabel = new Label();
-
-    //        foreach (var code in instructions)
-    //        {
-    //            if (currentStage == PatchStage.Searching)
-    //            {
-    //                if (code.operand == AccessTools.Field(typeof(ApparelLayerDefOf), "Shell"))
-    //                {
-    //                    currentStage = PatchStage.ExtractTargetLabel;
-    //                }
-    //            }
-    //            else if (currentStage == PatchStage.ExtractTargetLabel)
-    //            {
-    //                targetLabel = (Label)code.operand;
-    //                currentStage = PatchStage.PurgingInstructions;
-    //            }
-    //            else if (currentStage == PatchStage.PurgingInstructions)
-    //            {
-    //                if (code.labels.Contains(targetLabel))
-    //                {
-    //                    currentStage = PatchStage.Finished;
-    //                }
-    //                else
-    //                {
-    //                    code.opcode = OpCodes.Nop;
-    //                }
-    //            }
-
-    //            yield return code;
-    //        }
-    //    }
-    //}
 
 }

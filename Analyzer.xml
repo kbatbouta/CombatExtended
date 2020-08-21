@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Analyzer>
+    <CombatExtended-Bullet>
+        <Types>
+            <li>CombatExtended.BulletCE</li>
+            <li>CombatExtended.CompFragments</li>
+        </Types>
+        <Methods>
+            <li>CombatExtended.BulletCE:Impact</li>
+            <li>CombatExtended.BulletCE:NotifyImpact</li>
+            <li>CombatExtended.ProjectileCE:ApplySuppression</li>
+        </Methods>
+    </CombatExtended-Bullet>
+</Analyzer>

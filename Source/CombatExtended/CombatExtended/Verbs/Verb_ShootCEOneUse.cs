@@ -7,7 +7,7 @@ namespace CombatExtended
 {
 	public class Verb_ShootCEOneUse : Verb_ShootCE
 	{
-		protected override bool TryCastShot()
+		public override bool TryCastShot()
 		{
 			if (base.TryCastShot())
 			{

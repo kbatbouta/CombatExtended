@@ -16,6 +16,7 @@
     <ammoTypes>
       <Ammo_35x32mmSRGrenade_HE>Bullet_35x32mmSRGrenade_HE</Ammo_35x32mmSRGrenade_HE>
       <Ammo_35x32mmSRGrenade_EMP>Bullet_35x32mmSRGrenade_EMP</Ammo_35x32mmSRGrenade_EMP>
+			<Ammo_35x32mmSRGrenade_Smoke>Bullet_35x32mmSRGrenade_Smoke</Ammo_35x32mmSRGrenade_Smoke>	        
     </ammoTypes>
   </CombatExtended.AmmoSetDef>
 	
@@ -49,18 +50,7 @@
       <MarketValue>2.27</MarketValue>
     </statBases>
     <ammoClass>GrenadeHE</ammoClass>
-    <comps>
-      <li Class="CombatExtended.CompProperties_ExplosiveCE">
-        <explosionDamage>19</explosionDamage>
-        <explosionDamageDef>Bomb</explosionDamageDef>
-        <explosionRadius>1</explosionRadius>
-        <fragments>
-          <Fragment_Large>1</Fragment_Large>
-          <Fragment_Small>3</Fragment_Small>
-        </fragments>
-		<applyDamageToExplosionCellsNeighbors>true</applyDamageToExplosionCellsNeighbors>
-      </li>
-    </comps>
+	<detonateProjectile>Bullet_35x32mmSRGrenade_HE</detonateProjectile>
   </ThingDef>
 
   <ThingDef Class="CombatExtended.AmmoDef" ParentName="35x32mmSRGrenadeBase">
@@ -75,20 +65,47 @@
     </statBases>
     <ammoClass>GrenadeEMP</ammoClass>
     <comps>
-      <li Class="CombatExtended.CompProperties_ExplosiveCE">
-        <explosionDamage>5</explosionDamage>
-        <explosionDamageDef>Bomb</explosionDamageDef>
-        <explosionRadius>0.75</explosionRadius>
-        <fragments>
-          <Fragment_Large>1</Fragment_Large>
-        </fragments>
-      </li>
+	  <li Class="CombatExtended.CompProperties_ExplosiveCE">
+		<damageAmountBase>5</damageAmountBase>
+		<explosiveDamageType>Bomb</explosiveDamageType>
+		<explosiveRadius>0.75</explosiveRadius>
+	  </li>
+	  <li Class="CombatExtended.CompProperties_Fragments">
+		<fragments>
+			<Fragment_Large>1</Fragment_Large>
+		</fragments>
+	  </li>
     </comps>
   </ThingDef>
-	
+
+  <ThingDef Class="CombatExtended.AmmoDef" ParentName="35x32mmSRGrenadeBase">
+    <defName>Ammo_35x32mmSRGrenade_Smoke</defName>
+    <label>35x32mmSR grenade (Smoke)</label>
+    <graphicData>
+      <texPath>Things/Ammo/GrenadeLauncher/SMK</texPath>
+      <graphicClass>Graphic_StackCount</graphicClass>
+    </graphicData>
+    <statBases>
+      <MarketValue>1.77</MarketValue>
+    </statBases>
+    <ammoClass>Smoke</ammoClass>
+    <comps>
+	  <li Class="CombatExtended.CompProperties_ExplosiveCE">
+		<damageAmountBase>5</damageAmountBase>
+		<explosiveDamageType>Bomb</explosiveDamageType>
+		<explosiveRadius>0.75</explosiveRadius>
+	  </li>
+	  <li Class="CombatExtended.CompProperties_Fragments">
+		<fragments>
+			<Fragment_Large>1</Fragment_Large>
+		</fragments>
+	  </li>
+    </comps>
+  </ThingDef>
+
 	<!-- ================== Projectiles ================== -->
 
-	<ThingDef Class="CombatExtended.AmmoDef" Name="Base35x32mmSRGrenadeBullet" ParentName="BaseBullet" Abstract="true">
+	<ThingDef Name="Base35x32mmSRGrenadeBullet" ParentName="BaseBullet" Abstract="true">
 		<graphicData>
 			<texPath>Things/Projectile/Bullet_Big</texPath>
 			<graphicClass>Graphic_Single</graphicClass>
@@ -98,7 +115,7 @@
 		</projectile>
 	</ThingDef>
 
-	<ThingDef Class="CombatExtended.AmmoDef" ParentName="Base35x32mmSRGrenadeBullet">
+	<ThingDef ParentName="Base35x32mmSRGrenadeBullet">
 		<defName>Bullet_35x32mmSRGrenade_HE</defName>
 		<label>35x32mmSR grenade (HE)</label>
 		<thingClass>CombatExtended.ProjectileCE_Explosive</thingClass>
@@ -109,7 +126,7 @@
 			<applyDamageToExplosionCellsNeighbors>true</applyDamageToExplosionCellsNeighbors>
 		</projectile>
 		<comps>
-			<li Class="CombatExtended.CompProperties_ExplosiveCE">
+			<li Class="CombatExtended.CompProperties_Fragments">
 				<fragments>
           <Fragment_Large>1</Fragment_Large>
           <Fragment_Small>3</Fragment_Small>
@@ -118,7 +135,7 @@
 		</comps>
 		</ThingDef>
 
-	<ThingDef Class="CombatExtended.AmmoDef" ParentName="Base35x32mmSRGrenadeBullet">
+	<ThingDef ParentName="Base35x32mmSRGrenadeBullet">
 		<defName>Bullet_35x32mmSRGrenade_EMP</defName>
 		<label>35x32mmSR grenade (EMP)</label>
 		<thingClass>CombatExtended.ProjectileCE_Explosive</thingClass>
@@ -128,7 +145,18 @@
 			<damageAmountBase>19</damageAmountBase>
 		</projectile>
 	</ThingDef>
-  
+
+  <ThingDef ParentName="Base35x32mmSRGrenadeBullet">
+    <defName>Bullet_35x32mmSRGrenade_Smoke</defName>
+    <label>35x32mmSR grenade (Smoke)</label>
+    <projectile Class="CombatExtended.ProjectilePropertiesCE">
+      <explosionRadius>2</explosionRadius>
+      <damageDef>Smoke</damageDef>
+      <postExplosionSpawnThingDef>Gas_Smoke</postExplosionSpawnThingDef>
+      <preExplosionSpawnChance>1</preExplosionSpawnChance>
+    </projectile>
+  </ThingDef>
+
 	<!-- ==================== Recipes ========================== -->
 
   <RecipeDef ParentName="AmmoRecipeBase">
@@ -209,5 +237,49 @@
     </products>
     <workAmount>10400</workAmount>      
   </RecipeDef>
-	
+
+  <RecipeDef ParentName="AmmoRecipeBase">
+    <defName>MakeAmmo_35x32mmSRGrenade_Smoke</defName>
+    <label>make 35x32mmSR smoke grenades x100</label>
+    <description>Craft 100 35x32mmSR smoke grenades.</description>
+    <jobString>Making 35x32mmSR smoke grenades.</jobString>
+    <ingredients>
+      <li>
+        <filter>
+          <thingDefs>
+            <li>Steel</li>
+          </thingDefs>
+        </filter>
+        <count>50</count>
+      </li>
+      <li>
+        <filter>
+          <thingDefs>
+            <li>Prometheum</li>
+          </thingDefs>
+        </filter>
+        <count>2</count>
+      </li>
+      <li>
+        <filter>
+          <thingDefs>
+            <li>ComponentIndustrial</li>
+          </thingDefs>
+        </filter>
+        <count>2</count>
+      </li>      
+    </ingredients>
+    <fixedIngredientFilter>
+      <thingDefs>
+        <li>Steel</li>
+        <li>Prometheum</li>
+        <li>ComponentIndustrial</li>        
+      </thingDefs>
+    </fixedIngredientFilter>
+    <products>
+      <Ammo_35x32mmSRGrenade_Smoke>100</Ammo_35x32mmSRGrenade_Smoke>
+    </products>
+    <workAmount>7000</workAmount>
+  </RecipeDef>
+
 </Defs>

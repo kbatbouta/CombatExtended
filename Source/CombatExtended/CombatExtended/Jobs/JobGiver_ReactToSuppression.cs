@@ -6,7 +6,7 @@ namespace CombatExtended
 {
     public class JobGiver_ReactToSuppression : ThinkNode_JobGiver
     {
-        protected override Job TryGiveJob(Pawn pawn)
+        public override Job TryGiveJob(Pawn pawn)
         {
             var comp = pawn.TryGetComp<CompSuppressable>();
 
@@ -18,11 +18,16 @@ namespace CombatExtended
             if (reactJob == null && comp.IsHunkering)
             {
                 LessonAutoActivator.TeachOpportunity(CE_ConceptDefOf.CE_Hunkering, pawn, OpportunityType.Critical);
-                return new Job(CE_JobDefOf.HunkerDown, pawn) { checkOverrideOnExpire = true };
+                reactJob = JobMaker.MakeJob(CE_JobDefOf.HunkerDown, pawn);
+                reactJob.checkOverrideOnExpire = true;
+                return reactJob;
+            }
+            else
+            {
+                // Run for cover
+                LessonAutoActivator.TeachOpportunity(CE_ConceptDefOf.CE_SuppressionReaction, pawn, OpportunityType.Critical);
             }
 
-            // Run for cover
-            LessonAutoActivator.TeachOpportunity(CE_ConceptDefOf.CE_SuppressionReaction, pawn, OpportunityType.Critical);
             return reactJob;
         }
     }

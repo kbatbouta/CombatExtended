@@ -12,7 +12,7 @@ namespace CombatExtended
     {
         private static List<Thing> tmpThreats = new List<Thing>();
 
-        protected override Job TryGiveJob(Pawn pawn)
+        public override Job TryGiveJob(Pawn pawn)
         {
             if (pawn.playerSettings == null || !pawn.playerSettings.UsesConfigurableHostilityResponse)
             {
@@ -37,7 +37,7 @@ namespace CombatExtended
 
         private Job TryGetAttackNearbyEnemyJob(Pawn pawn)
         {
-            if (pawn.story != null && pawn.story.WorkTagIsDisabled(WorkTags.Violent))
+            if (pawn.story != null && pawn.WorkTagIsDisabled(WorkTags.Violent))
             {
                 return null;
             }
@@ -63,7 +63,7 @@ namespace CombatExtended
             }
             if (flag || thing.Position.AdjacentTo8Way(pawn.Position))
             {
-                return new Job(JobDefOf.AttackMelee, thing);
+                return JobMaker.MakeJob(JobDefOf.AttackMelee, thing);
             }
 
             // Check for reload before attacking
@@ -76,16 +76,16 @@ namespace CombatExtended
                 {
             		if (compAmmo.HasAmmo)
             		{
-                        Job job = new Job(CE_JobDefOf.ReloadWeapon, pawn, pawn.equipment.Primary);
+                        Job job = JobMaker.MakeJob(CE_JobDefOf.ReloadWeapon, pawn, pawn.equipment.Primary);
                         if (job != null)
                             return job;
             		}
             		
-            		return new Job(JobDefOf.AttackMelee, thing);
+            		return JobMaker.MakeJob(JobDefOf.AttackMelee, thing);
                 }
             }
 
-            return new Job(JobDefOf.AttackStatic, thing);
+            return JobMaker.MakeJob(JobDefOf.AttackStatic, thing);
         }
 
         private Job TryGetFleeJob(Pawn pawn)
@@ -111,7 +111,7 @@ namespace CombatExtended
             }
             IntVec3 fleeDest = GetFleeDest(pawn, tmpThreats);
             tmpThreats.Clear();
-            return new Job(JobDefOf.FleeAndCower, fleeDest);
+            return JobMaker.MakeJob(JobDefOf.FleeAndCower, fleeDest);
         }
 
 

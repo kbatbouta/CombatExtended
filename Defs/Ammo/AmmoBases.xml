@@ -85,7 +85,7 @@
 	<!-- ==================== Recipes ========================== -->
 
   <RecipeDef Name="AmmoRecipeBase" Abstract="true">
-    <workSpeedStat>SmithingSpeed</workSpeedStat>
+    <workSpeedStat>GeneralLaborSpeed</workSpeedStat>
     <effectWorking>Cook</effectWorking>
     <soundWorking>Recipe_Machining</soundWorking>
     <allowMixingIngredients>true</allowMixingIngredients>
@@ -99,12 +99,16 @@
 		<unfinishedThingDef>UnfinishedAmmo</unfinishedThingDef>
   </RecipeDef>
 
+  <RecipeDef Name="AdvancedAmmoRecipeBase" ParentName="AmmoRecipeBase" Abstract="true">
+  	<researchPrerequisite>CE_AdvancedAmmo</researchPrerequisite>
+  </RecipeDef>
+
   <RecipeDef Name="ChargeAmmoRecipeBase" ParentName="AmmoRecipeBase" Abstract="true">
   	<researchPrerequisite>ChargedShot</researchPrerequisite>
   </RecipeDef>
 
   <RecipeDef Name="AmmoRecipeNeolithicBase" Abstract="true">
-    <workSpeedStat>SmithingSpeed</workSpeedStat>
+    <workSpeedStat>GeneralLaborSpeed</workSpeedStat>
     <effectWorking>Cook</effectWorking>
     <soundWorking>Recipe_Machining</soundWorking>
     <allowMixingIngredients>true</allowMixingIngredients>

@@ -39,6 +39,7 @@ namespace CombatExtended
         protected CompAmmoUser compAmmo = null;
         protected CompFireModes compFireModes = null;
         protected CompChangeableProjectile compChangeable = null;
+        protected CompReloadable compReloadable = null;
         private float shotSpeed = -1;
 
         private float rotationDegrees = 0f;
@@ -98,8 +99,8 @@ namespace CombatExtended
 
         protected float ShootingAccuracy => Mathf.Min(CasterShootingAccuracyValue(caster), 4.5f);
         protected float AimingAccuracy => Mathf.Min(Shooter.GetStatValue(CE_StatDefOf.AimingAccuracy), 1.5f); //equivalent of ShooterPawn?.GetStatValue(CE_StatDefOf.AimingAccuracy) ?? caster.GetStatValue(CE_StatDefOf.AimingAccuracy)
-        protected float SightsEfficiency => EquipmentSource.GetStatValue(CE_StatDefOf.SightsEfficiency);
-        protected virtual float SwayAmplitude => Mathf.Max(0, (4.5f - ShootingAccuracy) * EquipmentSource.GetStatValue(StatDef.Named("SwayFactor")));
+        protected float SightsEfficiency => EquipmentSource?.GetStatValue(CE_StatDefOf.SightsEfficiency) ?? 1f;
+        protected virtual float SwayAmplitude => Mathf.Max(0, (4.5f - ShootingAccuracy) * (EquipmentSource?.GetStatValue(StatDef.Named("SwayFactor")) ?? 1f));
 
         // Ammo variables
         protected CompAmmoUser CompAmmo
@@ -153,7 +154,19 @@ namespace CombatExtended
             }
         }
 
-        private bool IsAttacking => ShooterPawn?.CurJobDef == JobDefOf.AttackStatic || ShooterPawn?.stances?.curStance is Stance_Warmup;
+        public CompReloadable CompReloadable
+        {
+            get
+            {
+                if (compReloadable == null && EquipmentSource != null)
+                {
+                    compReloadable = EquipmentSource.TryGetComp<CompReloadable>();
+                }
+                return compReloadable;
+            }
+        }
+
+        private bool IsAttacking => ShooterPawn?.CurJobDef == JobDefOf.AttackStatic || WarmingUp;
 
 
         #endregion
@@ -221,7 +234,7 @@ namespace CombatExtended
         {
             if (!calculateMechanicalOnly)
             {
-                Vector3 u = CasterPawn != null ? CasterPawn.DrawPos : caster.Position.ToVector3Shifted();
+                Vector3 u = caster.TrueCenter();
                 sourceLoc.Set(u.x, u.z);
 
                 if (numShotsFired == 0)
@@ -229,7 +242,10 @@ namespace CombatExtended
                     // On first shot of burst do a range estimate
                     estimatedTargDist = report.GetRandDist();
                 }
-                Vector3 v = report.targetPawn != null ? report.targetPawn.DrawPos + report.targetPawn.Drawer.leaner.LeanOffset * 0.5f : report.target.Cell.ToVector3Shifted();
+                Vector3 v = report.target.Thing?.TrueCenter() ?? report.target.Cell.ToVector3Shifted(); //report.targetPawn != null ? report.targetPawn.DrawPos + report.targetPawn.Drawer.leaner.LeanOffset * 0.5f : report.target.Cell.ToVector3Shifted();
+                if (report.targetPawn != null)
+                    v += report.targetPawn.Drawer.leaner.LeanOffset * 0.5f;
+
                 newTargetLoc.Set(v.x, v.z);
 
                 // ----------------------------------- STEP 1: Actual location + Shift for visibility
@@ -355,7 +371,7 @@ namespace CombatExtended
             report.shotSpeed = ShotSpeed;
             report.swayDegrees = SwayAmplitude;
             var spreadmult = projectilePropsCE != null ? projectilePropsCE.spreadMult : 0f;
-            report.spreadDegrees = EquipmentSource.GetStatValue(StatDef.Named("ShotSpread")) * spreadmult;
+            report.spreadDegrees = (EquipmentSource?.GetStatValue(StatDef.Named("ShotSpread")) ?? 0) * spreadmult;
             Thing cover;
             float smokeDensity;
             GetHighestCoverAndSmokeForTarget(target, out cover, out smokeDensity);
@@ -474,7 +490,7 @@ namespace CombatExtended
             if (ShooterPawn != null)
             {
                 // Check for capable of violence
-                if (ShooterPawn.story != null && ShooterPawn.story.WorkTagIsDisabled(WorkTags.Violent))
+                if (ShooterPawn.story != null && ShooterPawn.WorkTagIsDisabled(WorkTags.Violent))
                 {
                     report = "IsIncapableOfViolenceLower".Translate(ShooterPawn.Name.ToStringShort);
                     return false;
@@ -522,7 +538,7 @@ namespace CombatExtended
         /// Fires a projectile using the new aiming system
         /// </summary>
         /// <returns>True for successful shot, false otherwise</returns>
-        protected override bool TryCastShot()
+        public override bool TryCastShot()
         {
             if (!TryFindCEShootLineFromTo(caster.Position, currentTarget, out var shootLine))
             {
@@ -537,6 +553,7 @@ namespace CombatExtended
             bool pelletMechanicsOnly = false;
             for (int i = 0; i < projectilePropsCE.pelletCount; i++)
             {
+
                 ProjectileCE projectile = (ProjectileCE)ThingMaker.MakeThing(Projectile, null);
                 GenSpawn.Spawn(projectile, shootLine.Source, caster.Map);
                 ShiftTarget(report, pelletMechanicsOnly);
@@ -562,11 +579,16 @@ namespace CombatExtended
                 );
                 pelletMechanicsOnly = true;
             }
+           /// Log.Message("Fired from "+caster.ThingID+" at "+ShotHeight); /// 
             pelletMechanicsOnly = false;
             numShotsFired++;
             if (CompAmmo != null && !CompAmmo.CanBeFiredNow)
             {
                 CompAmmo?.TryStartReload();
+            }
+            if (CompReloadable != null)
+            {
+                CompReloadable.UsedOnce();
             }
             return true;
         }
@@ -589,8 +611,8 @@ namespace CombatExtended
          * -NIA
          */
 
-        private static List<IntVec3> tempDestList = new List<IntVec3>();
-        private static List<IntVec3> tempLeanShootSources = new List<IntVec3>();
+        private static new List<IntVec3> tempDestList = new List<IntVec3>();
+        private static new List<IntVec3> tempLeanShootSources = new List<IntVec3>();
 
         public bool TryFindCEShootLineFromTo(IntVec3 root, LocalTargetInfo targ, out ShootLine resultingLine)
         {
@@ -716,7 +738,7 @@ namespace CombatExtended
                 // Create validator to check for intersection with partial cover
                 var aimMode = CompFireModes?.CurrentAimMode;
 
-                bool CanShootThroughCell(IntVec3 cell)
+                Predicate<IntVec3> CanShootThroughCell = (IntVec3 cell) =>
                 {
                     Thing cover = cell.GetFirstPawn(caster.Map) ?? cell.GetCover(caster.Map);
 
@@ -752,7 +774,7 @@ namespace CombatExtended
                     }
 
                     return true;
-                }
+                };
 
                 // Add validator to parameters
                 foreach (IntVec3 curCell in SightUtility.GetCellsOnLine(shotSource, targetLoc.ToVector3(), caster.Map))
