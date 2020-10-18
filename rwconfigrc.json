@@ -1,0 +1,14 @@
+{
+  "folders": {
+    "1.2": {
+      "About": "path/to/def", // absoulte or relative path
+      "Defs": "Defs/", // note that you should replace "\\" to "/"
+      "DefReferences": [ // refernece to core, or other dependency mods.
+        "C:/Program Files (x86)/Steam/teamapps/common/RimWorld/Data/Core/Defs" // provide folder path
+      ],
+      "AssemblyReferences": [ // referencing dll files to extract typeInfos.
+        "Assemblies/CombatExtended.dll" // give exact dll
+      ]
+    }
+  }
+}

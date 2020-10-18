@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Patch>
+	<!-- Changing leather protection. -->
+	<Operation Class="PatchOperationSequence">
+		<success>Always</success>
+		<operations>
+			<!-- ==== Check for the mod. ==== -->
+			<li Class="CombatExtended.PatchOperationFindMod">
+				<modName>Black Widows 2.0</modName>
+			</li>
+
+			<!-- ==== WidowSilk ==== -->
+			<li Class="PatchOperationReplace">
+				<xpath>Defs/ThingDef[defName="WidowSilk"]/statBases/StuffPower_Armor_Sharp</xpath>
+				<value>
+					<StuffPower_Armor_Sharp>0.3</StuffPower_Armor_Sharp>
+				</value>
+			</li>
+			<li Class="PatchOperationReplace">
+				<xpath>Defs/ThingDef[defName="WidowSilk"]/statBases/StuffPower_Armor_Blunt</xpath>
+				<value>
+					<StuffPower_Armor_Blunt>0.06</StuffPower_Armor_Blunt>
+				</value>
+			</li>
+			<li Class="PatchOperationReplace">
+				<xpath>Defs/ThingDef[defName="WidowSilk"]/statBases/StuffPower_Armor_Heat</xpath>
+				<value>
+					<StuffPower_Armor_Heat>0</StuffPower_Armor_Heat>
+				</value>
+			</li>
+
+			<!-- ==== ThroneSilk ==== -->
+			<li Class="PatchOperationReplace">
+				<xpath>Defs/ThingDef[defName="ThroneSilk"]/statBases/StuffPower_Armor_Sharp</xpath>
+				<value>
+					<StuffPower_Armor_Sharp>0.5</StuffPower_Armor_Sharp>
+				</value>
+			</li>
+			<li Class="PatchOperationReplace">
+				<xpath>Defs/ThingDef[defName="ThroneSilk"]/statBases/StuffPower_Armor_Blunt</xpath>
+				<value>
+					<StuffPower_Armor_Blunt>0.1</StuffPower_Armor_Blunt>
+				</value>
+			</li>
+			<li Class="PatchOperationReplace">
+				<xpath>Defs/ThingDef[defName="ThroneSilk"]/statBases/StuffPower_Armor_Heat</xpath>
+				<value>
+					<StuffPower_Armor_Heat>0</StuffPower_Armor_Heat>
+				</value>
+			</li>
+
+			<!-- ==== AbyssSilk ==== -->
+			<li Class="PatchOperationReplace">
+				<xpath>Defs/ThingDef[defName="AbyssSilk"]/statBases/StuffPower_Armor_Sharp</xpath>
+				<value>
+					<StuffPower_Armor_Sharp>0.7</StuffPower_Armor_Sharp>
+				</value>
+			</li>
+			<li Class="PatchOperationReplace">
+				<xpath>Defs/ThingDef[defName="AbyssSilk"]/statBases/StuffPower_Armor_Blunt</xpath>
+				<value>
+					<StuffPower_Armor_Blunt>0.14</StuffPower_Armor_Blunt>
+				</value>
+			</li>
+			<li Class="PatchOperationReplace">
+				<xpath>Defs/ThingDef[defName="AbyssSilk"]/statBases/StuffPower_Armor_Heat</xpath>
+				<value>
+					<StuffPower_Armor_Heat>0</StuffPower_Armor_Heat>
+				</value>
+			</li>
+
+			<!-- ==== WidowSilk, ThroneSilk, AbyssSilk new thingCategory ==== -->
+			<li Class="PatchOperationAdd">
+				<xpath>/Defs/ThingDef[defName="WidowSilk" or defName="ThroneSilk" or defName="AbyssSilk"]/stuffProps/categories</xpath>
+				<value>
+					<li>SoftArmor</li>
+				</value>
+			</li>
+		</operations>
+	</Operation>
+</Patch>

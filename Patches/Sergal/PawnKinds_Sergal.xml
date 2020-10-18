@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Patch>
+	<Operation Class="PatchOperationSequence">
+		<success>Always</success>
+		<operations>
+		
+			<li Class="CombatExtended.PatchOperationFindMod">
+				<modName>Sergals Gnolls Lions and Frogs</modName>
+			</li>
+			
+			<!-- Spawn backpacks for selected Sergal pawntypes -->
+
+			<li Class="PatchOperationAdd">
+				<xpath>Defs/PawnKindDef[
+					defName="SergalColonist" or
+					defName="SergalCommando" or
+					defName="SergalCommandoElite" or
+					defName="SergalHunter" or
+					defName="SergalPackLeader" or
+					defName="SergalRecruit" or
+					defName="SergalSecurityGuard" or
+					defName="SergalTrader"
+				]</xpath>
+				<value>
+					<apparelRequired>
+						<li>Apparel_Backpack</li>
+					</apparelRequired>
+				</value>
+			</li>
+			
+			<!-- Spawn different combinations of primary ammo, secondary weapon and ammo for various Sergal pawntypes -->
+			
+			<li Class="PatchOperationAddModExtension">
+				<xpath>Defs/PawnKindDef[
+					defName="SergalRefugee" or
+					defName="SergalSlave"
+				]</xpath>
+				<value>
+					<li Class="CombatExtended.LoadoutPropertiesExtension">
+						<primaryMagazineCount>
+							<min>2</min>
+							<max>4</max>
+						</primaryMagazineCount>
+					</li>
+				</value>
+			</li>
+			
+			<li Class="PatchOperationAddModExtension">
+				<xpath>Defs/PawnKindDef[
+					defName="SergalColonist" or
+					defName="SergalCommando" or
+					defName="SergalCommandoElite" or
+					defName="SergalHunter" or
+					defName="SergalPackLeader" or
+					defName="SergalRecruit" or
+					defName="SergalSecurityGuard" or
+					defName="SergalTrader"
+				]</xpath>
+				<value>
+					<li Class="CombatExtended.LoadoutPropertiesExtension">
+						<primaryMagazineCount>
+							<min>6</min>
+							<max>8</max>
+						</primaryMagazineCount>
+						<sidearms>
+							<li>
+								<generateChance>1</generateChance>
+								<magazineCount>
+									<min>2</min>
+									<max>3</max>
+								</magazineCount>	
+								<weaponTags>
+									<li>CE_Sidearm</li>
+								</weaponTags>
+							</li>
+						</sidearms>
+					</li>
+				</value>
+			</li>
+
+		</operations>
+	</Operation>
+</Patch>
