@@ -6,10 +6,10 @@ namespace CombatExtended.Compatibility
     {
         public static void Init()
         {
-            if (EDShields.CanInstall())
-            {
-                EDShields.Install();
-            }
+            //if (EDShields.CanInstall())
+            //{
+            //    EDShields.Install();
+            //}
 
             Log.Message($"VanillaFurnitureExpandedShields.CanInstall() - {VanillaFurnitureExpandedShields.CanInstall()}");
             if (VanillaFurnitureExpandedShields.CanInstall())

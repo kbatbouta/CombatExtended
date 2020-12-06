@@ -1,76 +1,71 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFramework>net472</TargetFramework>
-    <AssemblyName>CombatExtended</AssemblyName>
-    <AssemblyVersion>1.1.2.0</AssemblyVersion>
-    <FileVersion>1.1.2.0</FileVersion>
-    <Version>1.1.2</Version>
-    <Company />
-    <Authors />
-    <Copyright>CC BY-NC-SA 4.0 2020</Copyright>
-    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>..\..\Assemblies\</OutputPath>
-    <DebugType>none</DebugType>
-    <DebugSymbols>false</DebugSymbols>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Optimize>true</Optimize>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>..\..\Assemblies\</OutputPath>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <DebugType>none</DebugType>
-    <DebugSymbols>false</DebugSymbols>
-  </PropertyGroup>
-
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="if $(ConfigurationName) == Debugger call &quot;C:\Program Files (x86)\Mono\bin\pdb2mdb.bat&quot; $(TargetDir)$(TargetName)$(TargetExt)" />
-  </Target>
-
-  <ItemGroup>
-    <Compile Remove="AI\**" />
-    <EmbeddedResource Remove="AI\**" />
-    <None Remove="AI\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="CombatExtended\Comps\CompProperties_SquadBrain.cs" />
-    <Compile Remove="CombatExtended\Comps\CompSquadBrain.cs" />
-    <Compile Remove="CombatExtended\Jobs\JobGiver_SquadDuty.cs" />
-    <Compile Remove="CombatExtended\Loadouts\HoldTrackerAssignment.cs" />
-    <Compile Remove="CombatExtended\Loadouts\ITabInjector.cs" />
-    <Compile Remove="CombatExtended\Loadouts\LoadoutAssignment.cs" />
-    <Compile Remove="CombatExtended\Loadouts\MainTabWindow_OutfitsAndLoadouts.cs" />
-    <Compile Remove="CombatExtended\Projectiles\ProjectileCE_Explosive_RL.cs" />
-    <Compile Remove="CombatExtended\ThinkNodes\ThinkNode_ConditionalHasSquad.cs" />
-    <Compile Remove="CombatExtended\ThinkNodes\ThinkNode_ConditionalNoJob.cs" />
-    <Compile Remove="Harmony\Harmony-HediffComp_GetsOld.cs" />
-    <Compile Remove="Harmony\Harmony-RaidStrategyWorker_ImmediateAttackSappers.cs" />
-    <Compile Remove="Harmony\Harmony_WeatherDecider.cs" />
-    <Compile Remove="Projectile_FireTrail.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="CombatExtended\ThinkNodes\ThinkNode_ConditionalNoJob.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Lib.Harmony" Version="2.0.1" PrivateAssets="All" />
-  </ItemGroup>
-
-  <ItemGroup>
-        <Reference Include="Assembly-CSharp">
-          <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\publicized_assemblies\Assembly-CSharp_publicized.dll</HintPath>
-          <Private>false</Private>
-        </Reference>
-        <Reference Include="Unity.TextMeshPro">
-      <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\Unity.TextMeshPro.dll</HintPath>
-      <Private>false</Private>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net472</TargetFramework>
+        <AssemblyName>CombatExtended</AssemblyName>
+        <AssemblyVersion>1.1.2.0</AssemblyVersion>
+        <FileVersion>1.1.2.0</FileVersion>
+        <Version>1.1.2</Version>
+        <Company />
+        <Authors />
+        <Copyright>CC BY-NC-SA 4.0 2020</Copyright>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+        <OutputPath>..\..\Assemblies\</OutputPath>
+        <DebugType>none</DebugType>
+        <DebugSymbols>false</DebugSymbols>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <OutputPath>..\..\Assemblies\</OutputPath>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <DebugType>none</DebugType>
+        <DebugSymbols>false</DebugSymbols>
+    </PropertyGroup>
+    <!--<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Exec Command="if $(ConfigurationName) == Debugger call &quot;C:\Program Files (x86)\Mono\bin\pdb2mdb.bat&quot; $(TargetDir)$(TargetName)$(TargetExt)" />
+    </Target>-->
+    <ItemGroup>
+        <Compile Remove="AI\**" />
+        <EmbeddedResource Remove="AI\**" />
+        <None Remove="AI\**" />
+        <Compile Remove="Compatibility\VanillaFurnitureExpandedShields.cs" />
+        <Compile Remove="Compatibility\ProjectRimFactory.cs" />
+        <Compile Remove="Compatibility\EDShields.cs" />
+        <Compile Remove="Harmony\Compatibility\Harmony_SaveOurShip.cs" />
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Remove="CombatExtended\Comps\CompProperties_SquadBrain.cs" />
+        <Compile Remove="CombatExtended\Comps\CompSquadBrain.cs" />
+        <Compile Remove="CombatExtended\Jobs\JobGiver_SquadDuty.cs" />
+        <Compile Remove="CombatExtended\Loadouts\HoldTrackerAssignment.cs" />
+        <Compile Remove="CombatExtended\Loadouts\ITabInjector.cs" />
+        <Compile Remove="CombatExtended\Loadouts\LoadoutAssignment.cs" />
+        <Compile Remove="CombatExtended\Loadouts\MainTabWindow_OutfitsAndLoadouts.cs" />
+        <Compile Remove="CombatExtended\Projectiles\ProjectileCE_Explosive_RL.cs" />
+        <Compile Remove="CombatExtended\ThinkNodes\ThinkNode_ConditionalHasSquad.cs" />
+        <Compile Remove="CombatExtended\ThinkNodes\ThinkNode_ConditionalNoJob.cs" />
+        <Compile Remove="Harmony\Harmony-HediffComp_GetsOld.cs" />
+        <Compile Remove="Harmony\Harmony-RaidStrategyWorker_ImmediateAttackSappers.cs" />
+        <Compile Remove="Harmony\Harmony_WeatherDecider.cs" />
+        <Compile Remove="Projectile_FireTrail.cs" />
+    </ItemGroup>
+    <ItemGroup>
+        <None Include="CombatExtended\ThinkNodes\ThinkNode_ConditionalNoJob.cs" />
+        <None Include="Compatibility\VanillaFurnitureExpandedShields.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
+        <None Include="Compatibility\ProjectRimFactory.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
+        <None Include="Compatibility\EDShields.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
+        <None Include="Harmony\Compatibility\Harmony_SaveOurShip.cs" Condition=" '$(EnableDefaultCompileItems)' == 'true' " />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Lib.Harmony" Version="2.0.4" PrivateAssets="All" />
+        <PackageReference Include="Krafs.Rimworld.Ref" Version="1.2.2753" PrivateAssets="All" />
+    </ItemGroup>
+    <!-- <ItemGroup>
+    <Reference Include="VFESecurity">
+      <HintPath>..\packages\VFESecurity.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.dll</HintPath>
@@ -321,9 +316,10 @@
       <Private>False</Private>
     </Reference>
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
-
+-->
+    <ItemGroup>
+        <Folder Include="Properties\" />
+        <Folder Include="Utilities\" />
+        <Folder Include="Utilities\Tracking\" />
+    </ItemGroup>
 </Project>
