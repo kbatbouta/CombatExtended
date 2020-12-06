@@ -238,24 +238,27 @@ namespace CombatExtended.Utilities
         public override void MapComponentOnGUI()
         {
             base.MapComponentOnGUI();
-            if (Find.Selector.SelectedPawns.Count > 0)
+            if (Controller.settings.DebugGenClosetPawn)
             {
-                var pawn = Find.Selector.SelectedPawns.First();
-                var others = SimilarInRangeOf(pawn, 10);
-
-                Vector2 a = UI.MapToUIPosition(pawn.DrawPos);
-                Vector2 b;
-                Vector2 mid;
-                Rect rect;
-                foreach (var other in others)
+                if (Find.Selector.SelectedPawns.Count > 0)
                 {
-                    b = UI.MapToUIPosition(other.DrawPos);
-                    Widgets.DrawLine(a, b, Color.red, 1);
+                    var pawn = Find.Selector.SelectedPawns.First();
+                    var others = SimilarInRangeOf(pawn, 10);
 
-                    mid = (a + b) / 2;
-                    rect = new Rect(mid.x - 25, mid.y - 15, 50, 30);
-                    Widgets.DrawBox(rect);
-                    Widgets.Label(rect, $"{other.Position.DistanceTo(pawn.Position)}m");
+                    Vector2 a = UI.MapToUIPosition(pawn.DrawPos);
+                    Vector2 b;
+                    Vector2 mid;
+                    Rect rect;
+                    foreach (var other in others)
+                    {
+                        b = UI.MapToUIPosition(other.DrawPos);
+                        Widgets.DrawLine(a, b, Color.red, 1);
+
+                        mid = (a + b) / 2;
+                        rect = new Rect(mid.x - 25, mid.y - 15, 50, 30);
+                        Widgets.DrawBox(rect);
+                        Widgets.Label(rect, $"{other.Position.DistanceTo(pawn.Position)}m");
+                    }
                 }
             }
         }
