@@ -26,6 +26,7 @@ namespace CombatExtended.HarmonyCE
         private static FieldInfo weaponField;
         private static FieldInfo thisField;
         private static FieldInfo currentField;
+        private static FieldInfo valueStringInt = AccessTools.Field(typeof(StatDrawEntry), "valueStringInt");
 
         static MethodBase TargetMethod()
         {
@@ -55,7 +56,7 @@ namespace CombatExtended.HarmonyCE
                         // Append aimed burst count
                         if (aimedBurstCount != burstShotCount)
                         {
-                            entry.valueStringInt = $"{aimedBurstCount} / {burstShotCount}";
+                            valueStringInt.SetValue(entry, $"{aimedBurstCount} / {burstShotCount}", BindingFlags.NonPublic | BindingFlags.Instance, null, CultureInfo.InvariantCulture);
                         }
                     }
                 }
@@ -100,7 +101,7 @@ namespace CombatExtended.HarmonyCE
                 var statRequestGun = StatRequest.For(turretGunDef, null);
                 
                 var cache = __result;
-
+                // :/
                 var newStats1 = DefDatabase<StatDef>.AllDefs
                     .Where(x => x.category == StatCategoryDefOf.Weapon
                         && x.Worker.ShouldShowFor(statRequestGun)

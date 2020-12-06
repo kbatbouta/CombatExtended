@@ -8,7 +8,6 @@ using Verse;
 using RimWorld;
 using UnityEngine;
 using Verse.AI;
-using RimWorld.BaseGen;
 
 namespace CombatExtended.HarmonyCE
 {
@@ -25,34 +24,34 @@ namespace CombatExtended.HarmonyCE
     [HarmonyPatch(typeof(Pawn_EquipmentTracker), "Notify_PrimaryDestroyed")]
     static class Pawn_EquipmentTracker_AddEquipment
     {
-        static void Postfix(Pawn_EquipmentTracker __instance)
+        static void Postfix(Pawn_EquipmentTracker __instance, Pawn ___pawn)
         {
+            //CE_Utility.TryUpdateInventory(pawn);   // Equipment was destroyed, update inventory
+
             // Try switching to the next available weapon
-            CompInventory inventory = __instance.pawn.TryGetComp<CompInventory>();
-            if (inventory != null)
-                inventory.SwitchToNextViableWeapon(false);
+            ___pawn.TryGetComp<CompInventory>()?.SwitchToNextViableWeapon(false);
         }
     }
 
     [HarmonyPatch(typeof(Pawn_EquipmentTracker), "TryDropEquipment")]
     static class Pawn_EquipmentTracker_TryDropEquipment
     {
-        static void Postfix(Pawn_EquipmentTracker __instance)
+        static void Postfix(Pawn_EquipmentTracker __instance, Pawn ___pawn)
         {
             // Cancel current job (use verb, etc.)
-            if (__instance.pawn.Spawned)
-                __instance.pawn.stances.CancelBusyStanceSoft();
+            if (___pawn.Spawned)
+                ___pawn.stances.CancelBusyStanceSoft();
         }
     }
 
     [HarmonyPatch(typeof(Pawn_EquipmentTracker), "TryTransferEquipmentToContainer")]
     static class Pawn_EquipmentTracker_TryTransferEquipmentToContainer
     {
-        static void Postfix(Pawn_EquipmentTracker __instance)
+        static void Postfix(Pawn_EquipmentTracker __instance, Pawn ___pawn)
         {
             // Cancel current job (use verb, etc.)
-            if (__instance.pawn.Spawned)
-                __instance.pawn.stances.CancelBusyStanceSoft();
+            if (___pawn.Spawned)
+                ___pawn.stances.CancelBusyStanceSoft();
         }
     }
 

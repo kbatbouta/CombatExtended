@@ -303,16 +303,16 @@
       <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.VRModule.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="UnityEngine.WindModule">
-      <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.WindModule.dll</HintPath>
-      <Private>false</Private>
+    <Reference Include="EDShields">
+      <HintPath>..\packages\ED-Shields-Reference.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.XRModule">
-      <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.XRModule.dll</HintPath>
-      <Private>false</Private>
+    <Reference Include="SOS2">
+      <HintPath>..\packages\ShipsHaveInsides.dll</HintPath>
+      <Private>False</Private>
     </Reference>
-    <Reference Include="VFESecurity">
-      <HintPath>..\packages\VFESecurity.dll</HintPath>
+    <Reference Include="ProjectRimFactory">
+      <HintPath>..\packages\ProjectRimFactory-Reference.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
