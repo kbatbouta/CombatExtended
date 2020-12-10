@@ -31,6 +31,7 @@ namespace CombatExtended
             public float density;
             public int positionIndex;
             public IntVec3 position;
+            public int lastDrawn;
 
             public GasParticle()
             {
@@ -185,36 +186,37 @@ namespace CombatExtended
 
         private void Draw(GasParticle particle)
         {
-            if (Rand.Chance(0.75f))
+            bool roofed = particle.position.Roofed(map);
+            if (Rand.Chance(roofed ? 0.25f : 0.75f))
                 return;
-            if (Rand.Chance(0.8f))
+            if (GenTicks.TicksGame - particle.lastDrawn <= (roofed ? 75 : 150))
+                return;
+            particle.lastDrawn = GenTicks.TicksGame;
+            MoteThrown obj = (MoteThrown)ThingMaker.MakeThing(ThingDefOf.Mote_Smoke);
+            obj.Scale = Rand.Range(1.5f, 2.5f) * Rand.Range(0.6f, 1.5f) * Mathf.Clamp(particle.density / gas.maxDensity, 0.5f, 2.2f) + (!roofed ? 1.5f : 0.5f);
+            obj.rotationRate = Rand.Range(-30f, 30f);
+            obj.exactPosition = particle.position.ToVector3() + new Vector3(Rand.Range(0f, 0.5f), Rand.Range(0f, 0.5f), Rand.Range(0f, 0.5f));
+            obj.SetVelocity(windAngle, Rand.Range(0.4f, 0.75f));
+            Color color;
+            if (roofed)
             {
-                MoteThrown obj = (MoteThrown)ThingMaker.MakeThing(ThingDefOf.Mote_Smoke);
-                obj.Scale = Rand.Range(1.5f, 2.5f) * Rand.Range(0.6f, 1.5f) * Mathf.Clamp(particle.density / gas.maxDensity, 0.5f, 2.2f) + 0.55f;
-                obj.rotationRate = Rand.Range(-30f, 30f);
-                obj.exactPosition = particle.position.ToVector3() + new Vector3(Rand.Range(0f, 0.5f), Rand.Range(0f, 0.5f), Rand.Range(0f, 0.5f));
-                obj.SetVelocity(windAngle, Rand.Range(0, 0.1f));
-
-                Color color = Color.gray;
-                color.a = Mathf.Clamp(particle.density / gas.maxDensity, 0.1f, !particle.position.Roofed(map) ? gas.opacityOutDoors : gas.opacityOutDoors);
-                obj.instanceColor = color;
-                GenSpawn.Spawn(obj, particle.position, map);
+                color = gas.colorInSide;
             }
             else
             {
-                MoteThrown obj = (MoteThrown)ThingMaker.MakeThing(ThingDefOf.Mote_DustPuff);
-                obj.Scale = Mathf.Clamp(particle.density / gas.maxDensity, 0.5f, 2.2f) + 0.15f;
-                obj.exactPosition = particle.position.ToVector3() + new Vector3(Rand.Range(0f, 0.5f), Rand.Range(0f, 0.5f), Rand.Range(0f, 0.5f));
-                Color color = Color.gray;
-                color.a = Mathf.Clamp(particle.density / gas.maxDensity, 0.1f, 0.7f);
-                obj.instanceColor = color;
-                GenSpawn.Spawn(obj, particle.position, map);
+                color = gas.colorOutSide;
             }
+            color.a = Mathf.Clamp(particle.density / gas.maxDensity, 0.1f, !particle.position.Roofed(map) ? gas.opacityOutDoors : gas.opacityOutDoors);
+            obj.instanceColor = color;
+            GenSpawn.Spawn(obj, particle.position, map);
         }
 
         private void ApplyHediffs(IntVec3 pos)
         {
-
+            if (gas.hediffGivers == null)
+                return;
+            foreach (var hediffGiver in gas.hediffGivers)
+                hediffGiver.TryApply(pos.GetFirstPawn(map));
         }
 
         private void Diffuse(GasParticle particle)
