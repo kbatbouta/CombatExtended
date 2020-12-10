@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<CombatExtended.GasDef>
+    <defName>BlackSmoke</defName>
+    <label>Black smoke</label>        
+    <description>Black smoke from things burning.</description>
+    <decayRateRoofed>15</decayRateRoofed>
+    <decayRateUnroofed>190</decayRateUnroofed>
+    <maxDensity>12800</maxDensity>
+    <minEffectiveDensity>100</minEffectiveDensity>
+    <isBad>true</isBad>
+    <blockLineOfSight>true</blockLineOfSight>
+    <affectedByWind>true</affectedByWind>
+  </CombatExtended.GasDef>
+</Defs>

@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Defs>
 
-  <ThingDef ParentName="BaseGas">
+  <!-- <ThingDef ParentName="BaseGas">
     <defName>Gas_BlackSmoke</defName>
     <thingClass>CombatExtended.Smoke</thingClass>
     <label>black smoke</label>
@@ -20,6 +20,6 @@
       <accuracyPenalty>0.7</accuracyPenalty>
       <rotationSpeed>50</rotationSpeed>
     </gas>
-  </ThingDef>
+  </ThingDef> -->
 
 </Defs>

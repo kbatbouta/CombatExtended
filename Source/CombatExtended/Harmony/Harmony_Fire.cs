@@ -67,7 +67,7 @@ namespace CombatExtended.HarmonyCE
     [HarmonyPatch(typeof(Fire), "Tick")]
     internal static class Harmony_Fire_Tick
     {
-        private const float SmokeDensityPerInterval = 900f;
+        private const float SmokeDensityPerInterval = 1800;
 
         internal static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
@@ -83,20 +83,21 @@ namespace CombatExtended.HarmonyCE
 
         internal static void Postfix(Fire __instance)
         {
-            if (__instance.Spawned
+            if (true
                 && Controller.settings.SmokeEffects
-                && __instance.IsHashIntervalTick(Smoke.UpdateIntervalTicks)
-                && __instance.Position.Roofed(__instance.Map))
+                && (__instance.Spawned)
+                && (__instance.thingIDNumber + GenTicks.TicksGame) % 30 == 0)
             {
-                if (__instance.Position.GetGas(__instance.Map) is Smoke existingSmoke)
-                {
-                    existingSmoke.UpdateDensityBy(SmokeDensityPerInterval);
-                }
-                else
-                {
-                    var newSmoke = (Smoke)GenSpawn.Spawn(CE_ThingDefOf.Gas_BlackSmoke, __instance.Position, __instance.Map);
-                    newSmoke.UpdateDensityBy(SmokeDensityPerInterval);
-                }
+                //if (SmokeGrid.GetGridFor(__instance.Map).GetAt(__instance.Position) is Smoke existingSmoke)
+                //{
+                //    existingSmoke.UpdateDensityBy(SmokeDensityPerInterval);
+                //}
+                //else
+                //{
+                //    var newSmoke = (Smoke)GenSpawn.Spawn(CE_ThingDefOf.Gas_BlackSmoke, __instance.Position, __instance.Map);
+                //    newSmoke.UpdateDensityBy(SmokeDensityPerInterval);
+                //}
+                GasTrackerCE.GetGasGrid(__instance.Map, CE_GasDefOf.BlackSmoke).PumpAt(__instance.Position, SmokeDensityPerInterval);
             }
         }
     }
